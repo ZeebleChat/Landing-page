@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zeeble — Chat Without Compromise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent:       #6366f1;
+  --accent-h:     #4f46e5;
+  --accent-glow:  rgba(99,102,241,0.22);
+  --purple:       #a78bfa;
+  --purple-deep:  #7c3aed;
+  --zurple:       #E8D8F0;
+  --zurple-dim:   rgba(232,216,240,0.12);
+  --zurple-glow:  rgba(232,216,240,0.18);
+  --blue:         #60a5fa;
+  --bg:           #0e0e14;
+  --bg-card:      #13131c;
+  --bg-card-2:    #16161f;
+  --border:       #2e2e42;
+  --border-hi:    #3e3e58;
+  --text-1:       #f0f0f8;
+  --text-2:       #c0c0d8;
+  --text-3:       #7070a0;
+  --green:        #34d399;
+  --amber:        #f59e0b;
+  --font-head:    'Plus Jakarta Sans', sans-serif;
+  --font-body:    'Inter', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -5%, rgba(124,58,237,0.14) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 45% at 85% 85%, rgba(37,99,235,0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 35% at 10% 60%, rgba(232,216,240,0.04) 0%, transparent 55%),
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.016) 39px, rgba(255,255,255,0.016) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.016) 39px, rgba(255,255,255,0.016) 40px);
+  color: var(--text-1);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── Utilities ────────────────────────────────────────────────────────────── */
+.container { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+.grad-text {
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.zurple-text { color: var(--zurple); }
+
+/* ── Nav ──────────────────────────────────────────────────────────────────── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(18px);
+  background: rgba(14,14,20,0.75);
+  border-bottom: 1px solid rgba(255,255,255,0.055);
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 62px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-head);
+  font-weight: 900; font-size: 1.35rem;
+  color: var(--text-1); text-decoration: none;
+}
+.nav-logo-icon {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--purple-deep), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; font-weight: 900; color: #fff;
+  box-shadow: 0 0 16px rgba(124,58,237,0.5);
+}
+.nav-links {
+  display: flex; align-items: center; gap: 28px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 0.88rem; font-weight: 500;
+  color: var(--text-3); text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text-1); }
+.nav-cta {
+  display: flex; gap: 10px;
+}
+.btn-ghost {
+  padding: 8px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  background: transparent; border: 1.5px solid var(--border-hi);
+  color: var(--text-2); cursor: pointer; transition: all 0.2s;
+  font-family: var(--font-body); text-decoration: none; display: inline-flex; align-items: center;
+}
+.btn-ghost:hover { border-color: var(--purple); color: var(--text-1); }
+.btn-primary {
+  padding: 8px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 700;
+  background: linear-gradient(135deg, var(--purple-deep), var(--accent));
+  border: none; color: #fff; cursor: pointer; transition: all 0.2s;
+  font-family: var(--font-body); text-decoration: none; display: inline-flex; align-items: center;
+  box-shadow: 0 0 18px rgba(124,58,237,0.35);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 28px rgba(124,58,237,0.5); }
+
+/* ── Hero ─────────────────────────────────────────────────────────────────── */
+.hero {
+  padding: 100px 0 80px;
+  text-align: center;
+  position: relative;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--zurple);
+  background: var(--zurple-dim);
+  border: 1px solid rgba(232,216,240,0.2);
+  padding: 5px 14px; border-radius: 99px;
+  margin-bottom: 26px;
+}
+.hero-eyebrow-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--zurple); display: inline-block;
+  box-shadow: 0 0 8px var(--zurple);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+.hero h1 {
+  font-family: var(--font-head);
+  font-size: clamp(2.8rem, 6vw, 4.8rem);
+  font-weight: 900; line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 22px;
+}
+.hero-sub {
+  font-size: 1.1rem; color: var(--text-2);
+  max-width: 560px; margin: 0 auto 38px;
+  line-height: 1.7;
+}
+.hero-btns {
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  margin-bottom: 64px;
+}
+.btn-hero-primary {
+  padding: 14px 32px; border-radius: 12px;
+  font-size: 1rem; font-weight: 700;
+  background: linear-gradient(135deg, var(--purple-deep), var(--accent));
+  border: none; color: #fff; cursor: pointer;
+  font-family: var(--font-head); text-decoration: none;
+  box-shadow: 0 0 32px rgba(124,58,237,0.45);
+  transition: all 0.2s;
+}
+.btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 0 48px rgba(124,58,237,0.6); }
+.btn-hero-secondary {
+  padding: 14px 32px; border-radius: 12px;
+  font-size: 1rem; font-weight: 600;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid var(--border-hi); color: var(--text-1);
+  cursor: pointer; font-family: var(--font-head); text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-hero-secondary:hover { background: rgba(255,255,255,0.08); border-color: var(--purple); }
+
+/* Mock UI */
+.hero-mock {
+  max-width: 860px; margin: 0 auto;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-hi);
+  border-radius: 18px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset,
+              0 32px 80px rgba(0,0,0,0.6),
+              0 0 60px rgba(124,58,237,0.12);
+  overflow: hidden;
+}
+.mock-bar {
+  display: flex; align-items: center; gap: 7px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+}
+.mock-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.mock-dot.r { background: #ef4444; }
+.mock-dot.y { background: #f59e0b; }
+.mock-dot.g { background: #22c55e; }
+.mock-title {
+  flex: 1; text-align: center;
+  font-size: 0.75rem; color: var(--text-3); font-weight: 500;
+}
+.mock-body {
+  display: flex; height: 340px;
+}
+.mock-sidebar {
+  width: 62px;
+  background: rgba(0,0,0,0.2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 12px 0; gap: 10px;
+}
+.mock-server-icon {
+  width: 38px; height: 38px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 800; color: #fff;
+  cursor: pointer; transition: border-radius 0.2s;
+}
+.mock-server-icon:hover { border-radius: 14px; }
+.msi-a { background: linear-gradient(135deg, #7c3aed, #4f46e5); box-shadow: 0 0 10px rgba(124,58,237,0.4); }
+.msi-b { background: linear-gradient(135deg, #0891b2, #2563eb); }
+.msi-c { background: linear-gradient(135deg, #059669, #0891b2); }
+.msi-d { background: rgba(255,255,255,0.08); color: var(--purple); font-size: 1rem; }
+.mock-channels {
+  width: 160px;
+  background: rgba(0,0,0,0.12);
+  border-right: 1px solid var(--border);
+  padding: 14px 10px;
+}
+.mock-server-name {
+  font-size: 0.75rem; font-weight: 800;
+  color: var(--text-1); font-family: var(--font-head);
+  margin-bottom: 14px; padding: 0 4px;
+}
+.mock-ch-cat {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-3);
+  padding: 0 4px; margin: 10px 0 4px;
+}
+.mock-ch {
+  font-size: 0.75rem; color: var(--text-3);
+  padding: 5px 8px; border-radius: 6px;
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; gap: 5px;
+}
+.mock-ch:hover, .mock-ch.active { background: rgba(255,255,255,0.07); color: var(--text-1); }
+.mock-ch.active { background: rgba(99,102,241,0.18); color: var(--purple); }
+.mock-main {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 16px;
+}
+.mock-messages { flex: 1; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+.mock-msg { display: flex; gap: 10px; align-items: flex-start; }
+.mock-avatar {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 800; color: #fff;
+}
+.mock-msg-content {}
+.mock-msg-name {
+  font-size: 0.72rem; font-weight: 700;
+  margin-bottom: 3px;
+}
+.mock-msg-text {
+  font-size: 0.78rem; color: var(--text-2); line-height: 1.5;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 0 8px 8px 8px;
+  padding: 7px 10px;
+  max-width: 380px;
+}
+.mock-input {
+  margin-top: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid var(--border-hi);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.8rem; color: var(--text-3);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* ── Section common ───────────────────────────────────────────────────────── */
+section { padding: 90px 0; }
+.section-eyebrow {
+  text-align: center;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--zurple);
+  margin-bottom: 12px;
+}
+.section-title {
+  text-align: center;
+  font-family: var(--font-head); font-weight: 900;
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  line-height: 1.2; margin-bottom: 14px;
+}
+.section-sub {
+  text-align: center; color: var(--text-2);
+  font-size: 1rem; max-width: 540px;
+  margin: 0 auto 52px; line-height: 1.7;
+}
+.divider-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-hi), transparent);
+  margin: 0 auto; max-width: 960px;
+}
+
+/* ── Feature Cards ────────────────────────────────────────────────────────── */
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+}
+.feat-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 18px; padding: 28px 24px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.feat-card:hover {
+  border-color: var(--border-hi);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset, 0 8px 32px rgba(0,0,0,0.3);
+}
+.feat-card.featured {
+  border-color: var(--purple-deep);
+  background: linear-gradient(160deg, #170f2a 0%, var(--bg-card) 60%);
+  box-shadow: 0 0 28px rgba(124,58,237,0.15);
+}
+.feat-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; margin-bottom: 16px;
+}
+.fi-purple { background: rgba(124,58,237,0.18); border: 1px solid rgba(124,58,237,0.3); }
+.fi-blue   { background: rgba(37,99,235,0.18);  border: 1px solid rgba(37,99,235,0.3); }
+.fi-green  { background: rgba(5,150,105,0.18);  border: 1px solid rgba(5,150,105,0.3); }
+.fi-amber  { background: rgba(217,119,6,0.18);  border: 1px solid rgba(217,119,6,0.3); }
+.fi-pink   { background: rgba(219,39,119,0.18); border: 1px solid rgba(219,39,119,0.3); }
+.fi-zurple { background: rgba(232,216,240,0.1); border: 1px solid rgba(232,216,240,0.2); }
+.feat-title {
+  font-family: var(--font-head); font-weight: 800; font-size: 1.05rem;
+  margin-bottom: 8px; color: var(--text-1);
+}
+.feat-desc { font-size: 0.87rem; color: var(--text-3); line-height: 1.65; }
+.feat-tag {
+  display: inline-block; margin-top: 12px;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--zurple);
+  background: var(--zurple-dim); border: 1px solid rgba(232,216,240,0.18);
+  padding: 3px 10px; border-radius: 99px;
+}
+
+/* ── Beam Identity Section ────────────────────────────────────────────────── */
+.beam-section {
+  background: linear-gradient(160deg, #120c22 0%, var(--bg) 60%);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.beam-inner {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+}
+.beam-visual {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-hi);
+  border-radius: 20px; padding: 32px;
+  box-shadow: 0 0 48px rgba(124,58,237,0.12);
+}
+.beam-profile {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+}
+.beam-avatar {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple-deep), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-head); font-weight: 900; font-size: 1.3rem; color: #fff;
+  box-shadow: 0 0 20px rgba(124,58,237,0.4);
+  position: relative;
+}
+.beam-premium-ring {
+  position: absolute; inset: -3px;
+  border-radius: 50%; border: 2px solid var(--zurple);
+  box-shadow: 0 0 10px var(--zurple-glow);
+}
+.beam-name { font-family: var(--font-head); font-weight: 800; font-size: 1.1rem; }
+.beam-tag { font-size: 0.8rem; color: var(--purple); font-weight: 600; }
+.beam-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 4px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--zurple);
+  background: var(--zurple-dim); border: 1px solid rgba(232,216,240,0.2);
+  padding: 3px 10px; border-radius: 99px;
+}
+.beam-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+}
+.beam-stat {
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px;
+  text-align: center;
+}
+.beam-stat-num { font-family: var(--font-head); font-weight: 800; font-size: 1.2rem; color: var(--purple); }
+.beam-stat-label { font-size: 0.7rem; color: var(--text-3); margin-top: 2px; }
+
+.beam-content h2 {
+  font-family: var(--font-head); font-weight: 900;
+  font-size: clamp(1.7rem, 3vw, 2.5rem); line-height: 1.2;
+  margin-bottom: 16px;
+}
+.beam-content p { color: var(--text-2); line-height: 1.7; margin-bottom: 14px; font-size: 0.95rem; }
+.beam-feature-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+.beam-feature-list li {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.88rem; color: var(--text-2);
+}
+.beam-check { color: var(--green); font-size: 0.9rem; }
+
+/* ── Pricing ──────────────────────────────────────────────────────────────── */
+.pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 720px; margin: 0 auto; }
+.price-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-hi);
+  border-radius: 20px; padding: 32px 28px;
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset;
+}
+.price-card.premium {
+  border-color: var(--purple-deep);
+  background: linear-gradient(160deg, #180f2e 0%, var(--bg-card) 55%);
+  box-shadow: 0 0 0 1px rgba(167,139,250,0.06) inset, 0 0 40px rgba(124,58,237,0.15);
+}
+.price-badge {
+  position: absolute; top: -13px; left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--purple-deep), var(--accent));
+  color: #fff; font-size: 0.68rem; font-weight: 800;
+  padding: 4px 16px; border-radius: 99px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  white-space: nowrap; font-family: var(--font-head);
+}
+.price-name { font-family: var(--font-head); font-weight: 800; font-size: 1.2rem; margin-bottom: 6px; }
+.price-amount { font-family: var(--font-head); font-weight: 900; font-size: 2.4rem; color: var(--purple); margin-bottom: 2px; }
+.price-amount span { font-size: 1rem; color: var(--text-3); font-weight: 400; }
+.price-tbd {
+  display: inline-block; font-size: 0.72rem; font-weight: 700;
+  background: rgba(245,158,11,0.12); color: var(--amber);
+  border: 1px solid rgba(245,158,11,0.28);
+  padding: 2px 10px; border-radius: 99px; margin-bottom: 18px;
+}
+.price-divider { height: 1px; background: var(--border); margin: 16px 0; }
+.price-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0; font-size: 0.87rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.price-row:last-child { border-bottom: none; }
+.price-label { color: var(--text-3); }
+.price-val { font-weight: 700; }
+.pv-base { color: var(--text-1); }
+.pv-hi   { color: var(--purple); }
+.pv-yes  { color: var(--green); }
+.pv-no   { color: #2a2a42; }
+.price-cta {
+  display: block; margin-top: 22px; text-align: center;
+  padding: 13px; border-radius: 10px; font-size: 0.9rem; font-weight: 700;
+  text-decoration: none; font-family: var(--font-head); transition: all 0.2s;
+}
+.cta-ghost {
+  background: rgba(255,255,255,0.05); border: 1.5px solid var(--border-hi); color: var(--text-1);
+}
+.cta-ghost:hover { background: rgba(255,255,255,0.08); }
+.cta-premium {
+  background: linear-gradient(135deg, var(--purple-deep), var(--accent));
+  border: none; color: #fff;
+  box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+}
+.cta-premium:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(124,58,237,0.55); }
+
+/* ── Boost Tiers ──────────────────────────────────────────────────────────── */
+.boost-section {
+  background: linear-gradient(160deg, #0a0f1e 0%, var(--bg) 50%);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.boost-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.boost-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-hi);
+  border-radius: 18px; padding: 28px 22px;
+  text-align: center;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.boost-card:hover { transform: translateY(-3px); }
+.boost-card.t2 {
+  border-color: #2563eb;
+  background: linear-gradient(160deg, #0d1a30 0%, var(--bg-card) 55%);
+  box-shadow: 0 0 24px rgba(37,99,235,0.12);
+}
+.boost-card.t3 {
+  border-color: var(--purple-deep);
+  background: linear-gradient(160deg, #180f2e 0%, var(--bg-card) 55%);
+  box-shadow: 0 0 24px rgba(124,58,237,0.15);
+}
+.boost-tier-label {
+  font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em;
+  margin-bottom: 12px;
+}
+.t1 .boost-tier-label { color: #9ca3af; }
+.t2 .boost-tier-label { color: var(--blue); }
+.t3 .boost-tier-label { color: var(--purple); }
+.boost-icon { font-size: 2.4rem; margin-bottom: 8px; }
+.boost-slots {
+  font-family: var(--font-head); font-weight: 900;
+  font-size: 3rem; line-height: 1;
+  margin-bottom: 4px;
+}
+.t1 .boost-slots { color: #9ca3af; }
+.t2 .boost-slots { color: var(--blue); }
+.t3 .boost-slots { color: var(--purple); }
+.boost-slots-label { font-size: 0.78rem; color: var(--text-3); margin-bottom: 16px; }
+.boost-perks { text-align: left; }
+.boost-perk {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.82rem; color: var(--text-2);
+  padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.boost-perk:last-child { border-bottom: none; }
+.bp-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.t1 .bp-dot { background: #9ca3af; }
+.t2 .bp-dot { background: var(--blue); }
+.t3 .bp-dot { background: var(--purple); }
+
+/* ── Self-hosted Banner ───────────────────────────────────────────────────── */
+.selfhost-banner {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-hi);
+  border-radius: 22px; padding: 52px 48px;
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 32px; align-items: center;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset,
+              0 0 48px rgba(0,0,0,0.4);
+  max-width: 900px; margin: 0 auto;
+  position: relative; overflow: hidden;
+}
+.selfhost-banner::before {
+  content: '';
+  position: absolute; top: -40px; right: -40px;
+  width: 220px; height: 220px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,216,240,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.selfhost-eyebrow {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--zurple); margin-bottom: 10px;
+}
+.selfhost-title {
+  font-family: var(--font-head); font-weight: 900;
+  font-size: clamp(1.4rem, 2.5vw, 2rem); line-height: 1.2; margin-bottom: 14px;
+}
+.selfhost-desc { color: var(--text-2); line-height: 1.7; font-size: 0.92rem; max-width: 500px; }
+.selfhost-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+.selfhost-pill {
+  font-size: 0.75rem; font-weight: 600;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border-hi);
+  color: var(--text-2); padding: 5px 12px; border-radius: 99px;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 44px 0;
+}
+.footer-inner {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+}
+.footer-logo {
+  display: flex; align-items: center; gap: 9px;
+  font-family: var(--font-head); font-weight: 900; font-size: 1.1rem;
+  color: var(--text-1); text-decoration: none;
+}
+.footer-logo-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--purple-deep), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 900; color: #fff;
+}
+.footer-links {
+  display: flex; gap: 22px; list-style: none; flex-wrap: wrap;
+}
+.footer-links a {
+  font-size: 0.83rem; color: var(--text-3); text-decoration: none; transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--text-1); }
+.footer-copy { font-size: 0.78rem; color: var(--text-3); }
+.zurple-accent { color: var(--zurple); }
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .features-grid { grid-template-columns: 1fr; }
+  .beam-inner { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .boost-grid { grid-template-columns: 1fr; }
+  .selfhost-banner { grid-template-columns: 1fr; padding: 36px 28px; }
+  .footer-inner { flex-direction: column; text-align: center; }
+  .mock-channels { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══════════════════════════════════════════════════════════════════ -->
+<nav>
+  <div class="container nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">Z</div>
+      Zeeble
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#beam">Beam Identity</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#boosts">Server Boosts</a></li>
+      <li><a href="#selfhost">Self-Host</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#" class="btn-primary">Get Started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ══════════════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-dot"></span>
+      Now in open beta
+    </div>
+    <h1>
+      Chat without<br>
+      <span class="grad-text">compromise</span>
+    </h1>
+    <p class="hero-sub">
+      Your identity. Your servers. Your rules.
+      Zeeble brings together real-time messaging, crystal-clear voice,
+      and a universal <span class="zurple-text">beam identity</span> that works everywhere.
+    </p>
+    <div class="hero-btns">
+      <a href="#" class="btn-hero-primary">Get Started — It's Free</a>
+      <a href="#selfhost" class="btn-hero-secondary">Self-Host with PhaseLink →</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ══ FEATURES ══════════════════════════════════════════════════════════════ -->
+<section id="features">
+  <div class="container">
+    <div class="section-eyebrow">Everything you need</div>
+    <h2 class="section-title">Built for real communities</h2>
+    <p class="section-sub">Whether you're a small friend group or a massive community, Zeeble scales with you — without charging you for the basics.</p>
+
+    <div class="features-grid">
+      <div class="feat-card featured">
+        <div class="feat-icon fi-purple">🪪</div>
+        <div class="feat-title">Beam Identity</div>
+        <div class="feat-desc">One identity that works across every Zeeble server — self-hosted or cloud. Your beam tag, avatar, and reputation follow you everywhere.</div>
+        <div class="feat-tag">Universal</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon fi-blue">🔊</div>
+        <div class="feat-title">Crystal-Clear Voice</div>
+        <div class="feat-desc">High-quality voice and video powered by LiveKit. Premium members get priority routing for the lowest latency possible.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon fi-green">🏠</div>
+        <div class="feat-title">Self-Host with PhaseLink</div>
+        <div class="feat-desc">Run your own Zeeble server with full control. No user caps, no data sharing — your community, your hardware.</div>
+        <div class="feat-tag">Free Forever</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon fi-zurple">😄</div>
+        <div class="feat-title">Community Emojis</div>
+        <div class="feat-desc">Boost your server to unlock public emoji slots. Your community's emojis become part of the whole Zeeble ecosystem.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon fi-amber">⚡</div>
+        <div class="feat-title">10 Free Cloud Servers</div>
+        <div class="feat-desc">Every free account gets 10 managed Zeeble cloud servers. No credit card. No trial period. Just create and go.</div>
+        <div class="feat-tag">No credit card</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon fi-pink">🔍</div>
+        <div class="feat-title">Message Search</div>
+        <div class="feat-desc">Full-text search across all your message history, for everyone. We don't lock basic features behind a paywall.</div>
+        <div class="feat-tag">Always free</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ══ BEAM IDENTITY ══════════════════════════════════════════════════════════ -->
+<section id="beam" class="beam-section">
+  <div class="container">
+    <div class="beam-inner">
+      <div class="beam-visual">
+        <div class="beam-profile">
+          <div class="beam-avatar">
+            W
+            <div class="beam-premium-ring"></div>
+          </div>
+          <div>
+            <div class="beam-name">WindMage</div>
+            <div class="beam-tag">»aurora7</div>
+            <div class="beam-badge">⚡ Premium</div>
+          </div>
+        </div>
+        <div class="beam-stats">
+          <div class="beam-stat">
+            <div class="beam-stat-num">47</div>
+            <div class="beam-stat-label">Servers</div>
+          </div>
+          <div class="beam-stat">
+            <div class="beam-stat-num">8</div>
+            <div class="beam-stat-label">Sub-accounts</div>
+          </div>
+          <div class="beam-stat">
+            <div class="beam-stat-num">12</div>
+            <div class="beam-stat-label">Boosts given</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="beam-content">
+        <div class="section-eyebrow" style="text-align:left">Beam Identity</div>
+        <h2>One identity.<br><span class="grad-text">Every server.</span></h2>
+        <p>Your beam tag is your universal identity on Zeeble. It follows you across self-hosted servers, cloud servers, and DMs — no re-registering, no profile juggling.</p>
+        <p>Premium members unlock custom beam tags — choose a unique tag that represents you, instead of an auto-assigned one.</p>
+        <ul class="beam-feature-list">
+          <li><span class="beam-check">✓</span> Works on every Zeeble server automatically</li>
+          <li><span class="beam-check">✓</span> Custom beam tags for Premium members</li>
+          <li><span class="beam-check">✓</span> Profile banner &amp; animated avatar with Premium</li>
+          <li><span class="beam-check">✓</span> Sub-accounts for alts, bots, and child accounts</li>
+          <li><span class="beam-check">✓</span> Verified badge for notable accounts</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PRICING ══════════════════════════════════════════════════════════════ -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-eyebrow">Pricing</div>
+    <h2 class="section-title">Simple, honest pricing</h2>
+    <p class="section-sub">The free tier is genuinely free. Premium unlocks more of everything — more servers, more sub-accounts, and priority voice.</p>
+
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Free</div>
+        <div class="price-amount">$0 <span>/ month</span></div>
+        <div class="price-divider"></div>
+        <div class="price-row"><span class="price-label">Self-hosted servers</span><span class="price-val pv-base">100</span></div>
+        <div class="price-row"><span class="price-label">Zeeble cloud servers</span><span class="price-val pv-base">10</span></div>
+        <div class="price-row"><span class="price-label">Sub-accounts</span><span class="price-val pv-base">10</span></div>
+        <div class="price-row"><span class="price-label">Voice quality</span><span class="price-val pv-base">Standard</span></div>
+        <div class="price-row"><span class="price-label">Message search</span><span class="price-val pv-yes">✓ Included</span></div>
+        <div class="price-row"><span class="price-label">Custom beam tag</span><span class="price-val pv-no">✗</span></div>
+        <div class="price-row"><span class="price-label">Profile banner</span><span class="price-val pv-no">✗</span></div>
+        <a href="#" class="price-cta cta-ghost">Get Started Free</a>
+      </div>
+
+      <div class="price-card premium">
+        <div class="price-badge">⚡ Most Popular</div>
+        <div class="price-name">Premium</div>
+        <div class="price-amount">$5 <span>/ month</span></div>
+        <div class="price-divider"></div>
+        <div class="price-row"><span class="price-label">Self-hosted servers</span><span class="price-val pv-hi">200</span></div>
+        <div class="price-row"><span class="price-label">Zeeble cloud servers</span><span class="price-val pv-hi">30</span></div>
+        <div class="price-row"><span class="price-label">Sub-accounts</span><span class="price-val pv-hi">20</span></div>
+        <div class="price-row"><span class="price-label">Voice quality</span><span class="price-val pv-hi">⚡ Priority</span></div>
+        <div class="price-row"><span class="price-label">Message search</span><span class="price-val pv-yes">✓ Included</span></div>
+        <div class="price-row"><span class="price-label">Custom beam tag</span><span class="price-val pv-yes">✓</span></div>
+        <div class="price-row"><span class="price-label">Profile banner &amp; animated avatar</span><span class="price-val pv-yes">✓</span></div>
+        <a href="#" class="price-cta cta-ghost">Get Started</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ══ SERVER BOOSTS ════════════════════════════════════════════════════════ -->
+<section id="boosts" class="boost-section">
+  <div class="container">
+    <div class="section-eyebrow">Server Boosts</div>
+    <h2 class="section-title">Power up your community</h2>
+    <p class="section-sub">Premium members get monthly boosts to spend on servers they love. Boosting unlocks public emoji slots that the whole Zeeble platform can use.</p>
+
+    <div class="boost-grid">
+      <div class="boost-card t1">
+        <div class="boost-tier-label">Tier 1</div>
+        <div class="boost-icon">⚡</div>
+        <div class="boost-slots">50</div>
+        <div class="boost-slots-label">public emoji slots</div>
+        <div class="boost-perks">
+          <div class="boost-perk"><div class="bp-dot"></div>Emojis usable across all of Zeeble</div>
+          <div class="boost-perk"><div class="bp-dot"></div>Static emojis</div>
+        </div>
+      </div>
+      <div class="boost-card t2">
+        <div class="boost-tier-label">Tier 2</div>
+        <div class="boost-icon">⚡⚡</div>
+        <div class="boost-slots">150</div>
+        <div class="boost-slots-label">public emoji slots</div>
+        <div class="boost-perks">
+          <div class="boost-perk"><div class="bp-dot"></div>Everything in Tier 1</div>
+          <div class="boost-perk"><div class="bp-dot"></div>Animated emojis unlocked</div>
+        </div>
+      </div>
+      <div class="boost-card t3">
+        <div class="boost-tier-label">Tier 3</div>
+        <div class="boost-icon">⚡⚡⚡</div>
+        <div class="boost-slots">500</div>
+        <div class="boost-slots-label">public emoji slots</div>
+        <div class="boost-perks">
+          <div class="boost-perk"><div class="bp-dot"></div>Everything in Tier 2</div>
+          <div class="boost-perk"><div class="bp-dot"></div>Animated server icon</div>
+        </div>
+      </div>
+    </div>
+
+    <p style="text-align:center;margin-top:28px;font-size:0.82rem;color:var(--text-3)">
+      If a server loses boosts, emojis are removed from the global pool — but never deleted.
+      Self-hosted server data stays on the admin's own server. Zeeble cloud emojis are locked until boosts are restored.
+    </p>
+  </div>
+</section>
+
+<!-- ══ SELF-HOST ════════════════════════════════════════════════════════════ -->
+<section id="selfhost">
+  <div class="container">
+    <div class="selfhost-banner">
+      <div>
+        <div class="selfhost-eyebrow">PhaseLink — Self-Hosted</div>
+        <div class="selfhost-title">Your server.<br><span class="zurple-text">Your data. Your rules.</span></div>
+        <div class="selfhost-desc">
+          Unlike Discord, Zeeble lets you run your own server with zero compromises. PhaseLink is fully open — no user caps, no telemetry, no dependence on Zeeble's infrastructure. Your community keeps its Beam identities and can still interact across the wider Zeeble network.
+        </div>
+        <div class="selfhost-pills">
+          <span class="selfhost-pill">Docker-ready</span>
+          <span class="selfhost-pill">Caddy / nginx</span>
+          <span class="selfhost-pill">LiveKit voice</span>
+          <span class="selfhost-pill">No user limits</span>
+          <span class="selfhost-pill">Your storage</span>
+        </div>
+      </div>
+      <div>
+        <a href="#" class="btn-hero-secondary" style="white-space:nowrap">View Setup Docs →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="container footer-inner">
+    <a href="#" class="footer-logo">
+      <div class="footer-logo-icon">Z</div>
+      Zeeble
+    </a>
+    <ul class="footer-links">
+      <li><a href="#">Features</a></li>
+      <li><a href="#">Pricing</a></li>
+      <li><a href="#">Self-Host</a></li>
+      <li><a href="#">Docs</a></li>
+      <li><a href="#">Blog</a></li>
+      <li><a href="#">Status</a></li>
+      <li><a href="#">Privacy</a></li>
+      <li><a href="#">Terms</a></li>
+    </ul>
+    <div class="footer-copy">
+      © 2026 Zeeble &nbsp;·&nbsp; Made with <span class="zurple-accent">Zurple</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

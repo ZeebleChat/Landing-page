@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zeeble Pricing Model</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: #0e0e14;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124,58,237,0.13) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(37,99,235,0.08) 0%, transparent 60%),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 39px,
+        rgba(255,255,255,0.018) 39px,
+        rgba(255,255,255,0.018) 40px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 39px,
+        rgba(255,255,255,0.018) 39px,
+        rgba(255,255,255,0.018) 40px
+      );
+    color: #e0e0f0;
+    padding: 40px 24px 60px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 900;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 52px;
+    font-size: 0.9rem;
+  }
+  .section { margin-bottom: 52px; max-width: 960px; margin-left: auto; margin-right: auto; }
+  .section-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #a78bfa;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  /* ── Personal Plans ── */
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .plan {
+    background: #13131c;
+    border: 1.5px solid #363650;
+    border-radius: 18px;
+    padding: 30px 26px;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset;
+  }
+  .plan.premium {
+    border-color: #7c3aed;
+    background: linear-gradient(160deg, #180f2e 0%, #13131c 55%);
+    box-shadow: 0 0 0 1px rgba(167,139,250,0.08) inset, 0 0 24px rgba(124,58,237,0.12);
+  }
+  .plan-badge {
+    position: absolute;
+    top: -13px; left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 4px 16px;
+    border-radius: 99px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .plan-name { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+  .plan-price { font-size: 2.2rem; font-weight: 900; color: #a78bfa; margin-bottom: 2px; }
+  .plan-price span { font-size: 1rem; color: #555; font-weight: 400; }
+  .tbd-pill {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: rgba(245,158,11,0.12);
+    color: #f59e0b;
+    border: 1px solid rgba(245,158,11,0.3);
+    padding: 2px 10px;
+    border-radius: 99px;
+    margin-bottom: 16px;
+  }
+  .divider { height: 1px; background: #1e1e2e; margin: 14px 0; }
+
+  .feature-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 0.88rem;
+    border-bottom: 1px solid #191926;
+  }
+  .feature-row:last-child { border-bottom: none; }
+  .feat-label { color: #999; }
+  .feat-val { font-weight: 700; }
+  .feat-val.yes  { color: #34d399; }
+  .feat-val.no   { color: #3a3a55; }
+  .feat-val.hi   { color: #a78bfa; }
+  .feat-val.base { color: #e0e0f0; }
+
+  /* ── Boost Tiers ── */
+  .boost-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  .boost-card {
+    background: #13131c;
+    border: 1.5px solid #363650;
+    border-radius: 16px;
+    padding: 26px 20px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset;
+  }
+  .boost-card.t2 { border-color: #2563eb; background: linear-gradient(160deg, #0d1a30 0%, #13131c 55%); box-shadow: 0 0 18px rgba(37,99,235,0.1); }
+  .boost-card.t3 { border-color: #7c3aed; background: linear-gradient(160deg, #180f2e 0%, #13131c 55%); box-shadow: 0 0 18px rgba(124,58,237,0.12); }
+
+  .tier-label {
+    font-size: 0.72rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin-bottom: 10px;
+  }
+  .t1 .tier-label { color: #9ca3af; }
+  .t2 .tier-label { color: #60a5fa; }
+  .t3 .tier-label { color: #a78bfa; }
+
+  .boost-emoji { font-size: 2.2rem; margin-bottom: 6px; }
+
+  .boost-needed {
+    font-size: 1.6rem; font-weight: 900; margin-bottom: 2px;
+  }
+  .t1 .boost-needed { color: #9ca3af; }
+  .t2 .boost-needed { color: #60a5fa; }
+  .t3 .boost-needed { color: #a78bfa; }
+  .boost-needed-label { font-size: 0.75rem; color: #555; margin-bottom: 16px; }
+
+  .emoji-box {
+    background: #0e0e14;
+    border-radius: 10px;
+    padding: 12px 8px;
+    margin-bottom: 12px;
+  }
+  .emoji-num { font-size: 1.8rem; font-weight: 900; }
+  .t1 .emoji-num { color: #9ca3af; }
+  .t2 .emoji-num { color: #60a5fa; }
+  .t3 .emoji-num { color: #a78bfa; }
+  .emoji-sub { font-size: 0.72rem; color: #666; margin-top: 2px; }
+
+  .boost-perks { text-align: left; margin-top: 10px; }
+  .boost-perk-item {
+    font-size: 0.78rem; color: #aaa;
+    padding: 4px 0;
+    border-bottom: 1px solid #1a1a26;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .boost-perk-item:last-child { border-bottom: none; }
+  .perk-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .t1 .perk-dot { background: #9ca3af; }
+  .t2 .perk-dot { background: #60a5fa; }
+  .t3 .perk-dot { background: #a78bfa; }
+
+  /* ── Drop Behaviour ── */
+  .drop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .drop-card {
+    background: #13131c;
+    border: 1.5px solid #363650;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset;
+  }
+  .drop-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 10px; }
+  .drop-item {
+    font-size: 0.83rem; color: #999;
+    padding: 6px 0;
+    border-bottom: 1px solid #191926;
+    line-height: 1.5;
+  }
+  .drop-item:last-child { border-bottom: none; }
+  .drop-item strong { color: #e0e0f0; }
+
+  /* ── Revenue Streams ── */
+  .revenue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .revenue-card {
+    background: #13131c;
+    border: 1.5px solid #363650;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset;
+  }
+  .revenue-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+  .revenue-desc { font-size: 0.83rem; color: #999; line-height: 1.6; }
+  .revenue-desc strong { color: #e0e0f0; }
+
+  /* ── TBD ── */
+  .tbd-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .tbd-card {
+    background: #13131c;
+    border: 1.5px solid #363650;
+    border-left: 3px solid #f59e0b;
+    border-radius: 0 10px 10px 0;
+    padding: 14px 16px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset;
+  }
+  .tbd-card-title { font-size: 0.82rem; font-weight: 700; color: #f59e0b; margin-bottom: 4px; }
+  .tbd-card-desc { font-size: 0.78rem; color: #888; line-height: 1.5; }
+
+  .confirmed-badge {
+    display: inline-block;
+    font-size: 0.68rem; font-weight: 700;
+    background: rgba(52,211,153,0.1);
+    color: #34d399;
+    border: 1px solid rgba(52,211,153,0.25);
+    padding: 1px 8px; border-radius: 99px;
+    margin-left: 6px; vertical-align: middle;
+  }
+
+  @media (max-width: 640px) {
+    .plans, .boost-grid, .drop-grid, .revenue-grid, .tbd-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Zeeble Pricing Model</h1>
+<p class="subtitle">Planning document — server boosts coming soon</p>
+
+<!-- ══ 1. PERSONAL ACCOUNTS ══ -->
+<div class="section">
+  <div class="section-title">👤 Personal Account Plans</div>
+  <div class="plans">
+
+    <div class="plan">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0 <span>/ month</span></div>
+      <div class="divider"></div>
+
+      <div class="feature-row"><span class="feat-label">Self-hosted servers (can join)</span><span class="feat-val base">10</span></div>
+      <div class="feature-row"><span class="feat-label">Zeeble cloud servers (can create)</span><span class="feat-val base">10</span></div>
+      <div class="feature-row"><span class="feat-label">Sub-accounts (all types)</span><span class="feat-val base">10</span></div>
+      <div class="feature-row"><span class="feat-label">Voice quality</span><span class="feat-val base">Standard</span></div>
+      <div class="feature-row"><span class="feat-label">Message search</span><span class="feat-val yes">✓ Included</span></div>
+      <div class="feature-row"><span class="feat-label">Custom beam tag</span><span class="feat-val no">✗</span></div>
+      <div class="feature-row"><span class="feat-label">Profile banner</span><span class="feat-val no">✗</span></div>
+      <div class="feature-row"><span class="feat-label">Animated avatar</span><span class="feat-val no">✗</span></div>
+      <div class="feature-row"><span class="feat-label">Premium badge</span><span class="feat-val no">✗</span></div>
+    </div>
+
+    <div class="plan premium">
+      <div class="plan-badge">⚡ Premium</div>
+      <div class="plan-name">Premium</div>
+      <div class="plan-price">$5 <span>/ month</span></div>
+      <div class="divider"></div>
+
+      <div class="feature-row"><span class="feat-label">Self-hosted servers (can join)</span><span class="feat-val hi">200</span></div>
+      <div class="feature-row"><span class="feat-label">Zeeble cloud servers (can create)</span><span class="feat-val hi">30</span></div>
+      <div class="feature-row"><span class="feat-label">Sub-accounts (all types)</span><span class="feat-val hi">20</span></div>
+      <div class="feature-row"><span class="feat-label">Voice quality</span><span class="feat-val hi">⚡ Priority</span></div>
+      <div class="feature-row"><span class="feat-label">Message search</span><span class="feat-val yes">✓ Included</span></div>
+      <div class="feature-row"><span class="feat-label">Custom beam tag</span><span class="feat-val yes">✓</span></div>
+      <div class="feature-row"><span class="feat-label">Profile banner</span><span class="feat-val yes">✓</span></div>
+      <div class="feature-row"><span class="feat-label">Animated avatar</span><span class="feat-val yes">✓</span></div>
+      <div class="feature-row"><span class="feat-label">Premium badge</span><span class="feat-val yes">✓</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ 2. SERVER BOOST TIERS ══ -->
+<div class="section">
+  <div class="section-title">🚀 Server Boost Tiers — Community Unlocks Public Emojis</div>
+  <div class="boost-grid">
+
+    <div class="boost-card t1">
+      <div class="tier-label">Tier 1</div>
+      <div class="boost-emoji">⚡</div>
+      <div class="boost-needed">?<span style="font-size:1rem"> boosts</span></div>
+      <div class="boost-needed-label"><span class="tbd-pill" style="margin:0">Boost count TBD</span></div>
+      <div class="emoji-box">
+        <div class="emoji-num">50</div>
+        <div class="emoji-sub">public emoji slots</div>
+      </div>
+      <div class="boost-perks">
+        <div class="boost-perk-item"><div class="perk-dot"></div>Emojis usable across all of Zeeble</div>
+        <div class="boost-perk-item"><div class="perk-dot"></div>Static emojis only</div>
+      </div>
+    </div>
+
+    <div class="boost-card t2">
+      <div class="tier-label">Tier 2</div>
+      <div class="boost-emoji">⚡⚡</div>
+      <div class="boost-needed">?<span style="font-size:1rem"> boosts</span></div>
+      <div class="boost-needed-label"><span class="tbd-pill" style="margin:0">Boost count TBD</span></div>
+      <div class="emoji-box">
+        <div class="emoji-num">150</div>
+        <div class="emoji-sub">public emoji slots</div>
+      </div>
+      <div class="boost-perks">
+        <div class="boost-perk-item"><div class="perk-dot"></div>Everything in Tier 1</div>
+        <div class="boost-perk-item"><div class="perk-dot"></div>Animated emojis unlocked</div>
+      </div>
+    </div>
+
+    <div class="boost-card t3">
+      <div class="tier-label">Tier 3</div>
+      <div class="boost-emoji">⚡⚡⚡</div>
+      <div class="boost-needed">?<span style="font-size:1rem"> boosts</span></div>
+      <div class="boost-needed-label"><span class="tbd-pill" style="margin:0">Boost count TBD</span></div>
+      <div class="emoji-box">
+        <div class="emoji-num">500</div>
+        <div class="emoji-sub">public emoji slots</div>
+      </div>
+      <div class="boost-perks">
+        <div class="boost-perk-item"><div class="perk-dot"></div>Everything in Tier 2</div>
+        <div class="boost-perk-item"><div class="perk-dot"></div>Animated server icon</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ 3. WHEN BOOSTS DROP ══ -->
+<div class="section">
+  <div class="section-title">📉 What Happens When a Server Loses Boosts</div>
+  <div class="drop-grid">
+
+    <div class="drop-card">
+      <div class="drop-title">🏠 Self-Hosted Servers</div>
+      <div class="drop-item"><strong>Removed from the global Zeeble emoji pool</strong> — no longer usable platform-wide.</div>
+      <div class="drop-item">Emoji data <strong>stays on the server admin's own database</strong> — Zeeble doesn't touch it.</div>
+      <div class="drop-item">Server admin bears their own storage cost. Zeeble bears nothing.</div>
+      <div class="drop-item">Boost back up → emojis are <strong>instantly re-submitted</strong> to the public pool.</div>
+    </div>
+
+    <div class="drop-card">
+      <div class="drop-title">☁️ Zeeble Cloud Servers</div>
+      <div class="drop-item"><strong>Removed from the global pool</strong> and <strong>locked</strong> within the server.</div>
+      <div class="drop-item">Emoji data <strong>kept on Zeeble's servers</strong> — nothing is deleted.</div>
+      <div class="drop-item">Members cannot use the emojis until boosts are restored.</div>
+      <div class="drop-item">Boost back up → emojis <strong>unlock immediately</strong>, no re-upload needed.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ 4. REVENUE STREAMS ══ -->
+<div class="section">
+  <div class="section-title">💵 Revenue Streams</div>
+  <div class="revenue-grid">
+
+    <div class="revenue-card">
+      <div class="revenue-title">⚡ Personal Premium Subscriptions</div>
+      <div class="revenue-desc">
+        Users pay monthly for personal perks — <strong>more servers, more sub-accounts, priority voice, custom beam tags, profile perks, and monthly boost credits</strong>.<br><br>
+        Managed via <strong>Stripe recurring billing</strong>. Webhook flips <code>premium = true</code> on their zbeam account.
+      </div>
+    </div>
+
+    <div class="revenue-card">
+      <div class="revenue-title">🚀 Server Boosts</div>
+      <div class="revenue-desc">
+        Premium users receive boost credits monthly and spend them on servers they want to support.<br><br>
+        Boosts push servers through <strong>3 tiers</strong>, unlocking public emoji slots for the whole Zeeble platform. No boosts = emojis pulled from the global pool.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ 5. WHAT ZEEBLE HOSTS (cost liability) ══ -->
+<div class="section">
+  <div class="section-title">🖥️ What Zeeble Hosts vs. Self-Hosted Admins</div>
+  <div class="drop-grid">
+
+    <div class="drop-card">
+      <div class="drop-title" style="color:#f87171">💸 Zeeble's Infrastructure Cost</div>
+      <div class="drop-item"><strong>zbeam</strong> — user accounts, auth, sub-accounts, beam tags</div>
+      <div class="drop-item"><strong>zcloud</strong> — managed cloud chat servers (capped at 5 free / 30 premium)</div>
+      <div class="drop-item"><strong>zpulse</strong> — DMs, DM attachments, LiveKit voice rooms</div>
+      <div class="drop-item"><strong>Global emoji pool</strong> — storage + serving for public emojis from boosted servers</div>
+    </div>
+
+    <div class="drop-card">
+      <div class="drop-title" style="color:#34d399">✅ Self-Hosted Admin's Problem</div>
+      <div class="drop-item">Their own <strong>message history, channels, attachments</strong></div>
+      <div class="drop-item">Their own <strong>voice rooms</strong> via PhaseLink</div>
+      <div class="drop-item">Their own <strong>server emojis</strong> (local only until boosted public)</div>
+      <div class="drop-item">Their own <strong>server limits, roles, moderation</strong> — Zeeble doesn't interfere</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ 6. STILL TBD ══ -->
+<div class="section">
+  <div class="section-title">⏳ Still To Decide</div>
+  <div class="tbd-grid">
+    <div class="tbd-card">
+      <div class="tbd-card-title">Boosts per premium user</div>
+      <div class="tbd-card-desc">How many boost credits do premium users get per month? Can they split across multiple servers?</div>
+    </div>
+    <div class="tbd-card">
+      <div class="tbd-card-title">Boost counts per tier</div>
+      <div class="tbd-card-desc">How many boosts to reach Tier 1, 2, and 3? Suggested: 5 / 15 / 30</div>
+    </div>
+    <div class="tbd-card">
+      <div class="tbd-card-title">DM attachment limits</div>
+      <div class="tbd-card-desc">Max file size per DM attachment — free vs premium. These hit Zeeble's storage directly.</div>
+    </div>
+    <div class="tbd-card">
+      <div class="tbd-card-title">Emoji moderation</div>
+      <div class="tbd-card-desc">Manual review before emojis go public, or trust-first with report/remove system?</div>
+    </div>
+    <div class="tbd-card">
+      <div class="tbd-card-title">Stripe setup</div>
+      <div class="tbd-card-desc">Account being created. Integration starts after — webhook → premium flag in zbeam.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

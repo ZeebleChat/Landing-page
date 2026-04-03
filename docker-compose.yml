@@ -1,0 +1,65 @@
+# Zeeble Landing - Docker Compose
+# Static landing page + Cloudflare tunnel
+#
+# Usage:
+#   docker compose up -d
+#   docker compose logs -f
+
+services:
+  # ── Zeeble Landing Page (nginx) ──────────────────────────────────────────────
+  landing:
+    build: .
+    container_name: zeeble-landing
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - zeeble-net
+
+  # ── Caddy Reverse Proxy (rack only — not needed for tunnel/dev) ──────────────
+  caddy:
+    profiles: [rack]
+    image: caddy:2-alpine
+    container_name: zeeble-landing-caddy
+    ports:
+      - "${HTTP_PORT:-8082}:8082"
+      - "${HTTPS_PORT:-8445}:8445"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      HTTP_PORT: ${HTTP_PORT:-8082}
+      HTTPS_PORT: ${HTTPS_PORT:-8445}
+      TLS_CERT: ${TLS_CERT:-/certs/fullchain.pem}
+      TLS_KEY: ${TLS_KEY:-/certs/privkey.pem}
+    depends_on:
+      - landing
+    restart: unless-stopped
+    networks:
+      - zeeble-net
+
+  # ── Cloudflare Tunnel ─────────────────────────────────────────────────────────
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: zeeble-landing-cloudflared
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config.yml run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    volumes:
+      - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+    restart: unless-stopped
+    networks:
+      - zeeble-net
+    depends_on:
+      - landing
+
+networks:
+  zeeble-net:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

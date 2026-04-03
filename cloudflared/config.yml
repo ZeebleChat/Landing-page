@@ -1,0 +1,6 @@
+ingress:
+  - hostname: zeeble.xyz
+    service: http://landing:80
+  - hostname: www.zeeble.xyz
+    service: http://landing:80
+  - service: http_status:404
