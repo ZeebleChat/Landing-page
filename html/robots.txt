@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Sitemap: https://zeeble.xyz/sitemap.xml
+
+# Zeeble landing page
+# All content is public and indexable
